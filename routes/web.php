@@ -1,14 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Laravel\Fortify\Features;
+use Inertia\Inertia;
 
-Route::inertia('/', 'welcome', [
-    'canRegister' => Features::enabled(Features::registration()),
-])->name('home');
-
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('dashboard', 'dashboard')->name('dashboard');
+// Rute utama langsung kita arahkan ke Katalog Bali Happy Pudding
+Route::get('/', function () {
+    return Inertia::render('Catalog');
 });
 
-require __DIR__.'/settings.php';
+Route::get('/katalog', function () {
+    return Inertia::render('Catalog');
+});
