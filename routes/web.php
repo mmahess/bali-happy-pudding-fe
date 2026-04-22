@@ -18,3 +18,7 @@ Route::get('/pesan', function () {
 Route::get('/keranjang', function () {
     return Inertia::render('Cart');
 });
+
+Route::get('/admin', function () {
+    return Inertia::render('Admin/Index');
+});

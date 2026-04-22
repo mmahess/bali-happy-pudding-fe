@@ -9,96 +9,51 @@ export default function ProductDetail() {
 
 
 
-    const productsDatabase = [
-        {
-            id: 1,
-            name: 'Whole Pudding',
-            description: 'Puding lembut berlapis jelly bening dengan topping buah-buahan segar pilihan. Dibuat fresh setiap hari.',
-            basePrice: 160000,
-            variants: [
-                { name: 'Choco Oreo' },
-                { name: 'Kelapa Pandan' },
-                { name: 'Es Teler' },
-                { name: 'Mozaik' },
-                { name: 'Regal' },
-                { name: 'Lumut' },
-            ],
-            sizes: [
-                { name: 'Diameter 18cm', price: 160000, label: '160K' },
-                { name: 'Diameter 20cm', price: 180000, label: '180K' },
-                { name: 'Diameter 22cm', price: 220000, label: '220K' },
-                { name: 'Diameter 26cm', price: 290000, label: '290K' },
-            ]
-        },
-        {
-            id: 2,
-            name: 'Pudding Tart Kotak Panjang',
-            description: 'Pudding tart berbentuk kotak memanjang ukuran 21x9cm, cocok untuk acara keluarga kecil atau hantaran manis.',
-            basePrice: 160000,
-            variants: [
-                { name: 'Black Forest' },
-                { name: 'Buah' },
-                { name: 'Tiramissu' },
-                { name: 'Es Teler' },
-                { name: 'Strawberry Cheese' },
-                { name: 'Kelapa Pandan' },
-                { name: 'Choco Marble' },
-            ],
-            sizes: [
-                { name: 'Ukuran 21x9cm', price: 160000, label: '160K' },
-                { name: 'Ukuran 25x10cm', price: 200000, label: '200K' },
-            ]
-        },
-        {
-            id: 3,
-            name: 'Pudding Tart Bulat',
-            description: 'Pudding tart bundar elegan dengan kombinasi rasa premium, sangat pas untuk kue ulang tahun atau perayaan.',
-            basePrice: 260000,
-            variants: [
-                { name: 'Black Forest' },
-                { name: 'Buah' },
-                { name: 'Tiramissu' },
-                { name: 'Es Teler' },
-                { name: 'Strawberry Cheese' },
-                { name: 'Kelapa Pandan' },
-                { name: 'Choco Marble' },
-            ],
-            sizes: [
-                { name: 'Diameter 18cm', price: 260000, label: '260K' },
-                { name: 'Diameter 20cm', price: 290000, label: '290K' },
-            ]
-        },
-        {
-            id: 4,
-            name: 'Pudding Cup',
-            description: 'Pudding mini dalam wadah cup praktis. Hadir dalam satu box yang berisi berbagai pilihan rasa menarik.',
-            basePrice: 55000,
-            variants: [
-                { name: 'Choco Lava' },
-                { name: 'Strawberry' },
-                { name: 'Black Forest' },
-                { name: 'Tiramissu' },
-                { name: 'Es Teler' },
-                { name: 'Kelapa Pandan' },
-                { name: 'Buah' },
-                { name: 'Mango Cocktail' },
-            ],
-            sizes: [
-                { name: 'Box Isi 8 Pcs', price: 55000, label: '55K' },
-                { name: 'Box Isi 12 Pcs', price: 80000, label: '80K' },
-            ]
+    // Dapatkan data dari localStorage atau gunakan default
+    let allProducts = [];
+    if (typeof window !== 'undefined') {
+        const savedProducts = JSON.parse(localStorage.getItem('allProducts') || 'null');
+        if (savedProducts) {
+            allProducts = savedProducts;
+        } else {
+            allProducts = [
+                {
+                    id: 1, name: 'Whole Pudding', category: 'Whole Pudding', description: 'Puding lembut berlapis jelly bening dengan topping buah-buahan segar pilihan. Dibuat fresh setiap hari.', basePrice: 160000, price: 160000, image: '/images/whole1.jpg',
+                    variants: [{ name: 'Choco Oreo' }, { name: 'Kelapa Pandan' }, { name: 'Es Teler' }, { name: 'Mozaik' }, { name: 'Regal' }, { name: 'Lumut' }],
+                    sizes: [{ name: 'Diameter 18cm', price: 160000, label: '160K' }, { name: 'Diameter 20cm', price: 180000, label: '180K' }, { name: 'Diameter 22cm', price: 220000, label: '220K' }, { name: 'Diameter 26cm', price: 290000, label: '290K' }]
+                },
+                {
+                    id: 2, name: 'Pudding Tart Kotak Panjang', category: 'Pudding Tart', description: 'Pudding tart berbentuk kotak memanjang ukuran 21x9cm, cocok untuk acara keluarga kecil atau hantaran manis.', basePrice: 160000, price: 160000, image: '/images/whole2.jpg',
+                    variants: [{ name: 'Black Forest' }, { name: 'Buah' }, { name: 'Tiramissu' }, { name: 'Es Teler' }, { name: 'Strawberry Cheese' }, { name: 'Kelapa Pandan' }, { name: 'Choco Marble' }],
+                    sizes: [{ name: 'Ukuran 21x9cm', price: 160000, label: '160K' }, { name: 'Ukuran 25x10cm', price: 200000, label: '200K' }]
+                },
+                {
+                    id: 3, name: 'Pudding Tart Bulat', category: 'Pudding Tart', description: 'Pudding tart bundar elegan dengan kombinasi rasa premium, sangat pas untuk kue ulang tahun atau perayaan.', basePrice: 260000, price: 260000, image: '/images/whole3.jpg',
+                    variants: [{ name: 'Black Forest' }, { name: 'Buah' }, { name: 'Tiramissu' }, { name: 'Es Teler' }, { name: 'Strawberry Cheese' }, { name: 'Kelapa Pandan' }, { name: 'Choco Marble' }],
+                    sizes: [{ name: 'Diameter 18cm', price: 260000, label: '260K' }, { name: 'Diameter 20cm', price: 290000, label: '290K' }]
+                },
+                {
+                    id: 4, name: 'Pudding Cup', category: 'Pudding Cup', description: 'Pudding mini dalam wadah cup praktis. Hadir dalam satu box yang berisi berbagai pilihan rasa menarik.', basePrice: 55000, price: 55000, image: '/images/whole3.jpg',
+                    variants: [{ name: 'Choco Lava' }, { name: 'Strawberry' }, { name: 'Black Forest' }, { name: 'Tiramissu' }, { name: 'Es Teler' }, { name: 'Kelapa Pandan' }, { name: 'Buah' }, { name: 'Mango Cocktail' }],
+                    sizes: [{ name: 'Box Isi 8 Pcs', price: 55000, label: '55K' }, { name: 'Box Isi 12 Pcs', price: 80000, label: '80K' }]
+                }
+            ];
+            localStorage.setItem('allProducts', JSON.stringify(allProducts));
         }
-    ];
+    }
 
     // Dapatkan ID dari URL
     const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
     const idParam = params.get('id');
     const productId = idParam ? parseInt(idParam) : 1;
 
-    const product = productsDatabase.find(p => p.id === productId) || productsDatabase[0];
-    const variants = product.variants;
-    const sizes = product.sizes;
-    const totalPrice = selectedSize ? selectedSize.price : product.basePrice;
+    const product = allProducts.length > 0 ? (allProducts.find((p: any) => p.id === productId) || allProducts[0]) : null;
+
+    // Safety check in case rendering before JS execution
+    if (!product) return null;
+    const variants = product.variants || [];
+    const sizes = product.sizes || [];
+    const totalPrice = selectedSize ? selectedSize.price : (product.basePrice || (sizes.length > 0 ? sizes[0].price : 0));
 
     const handleSubmit = () => {
         if (!selectedVariant || !selectedSize) {
@@ -158,7 +113,7 @@ export default function ProductDetail() {
 
                     <div className="pt-6">
                         <div className="text-xs font-extrabold text-[#b31c24] tracking-[0.15em] uppercase mb-2">
-                            Whole Pudding
+                            {product.category || 'Pudding'}
                         </div>
                         <h1 className="text-3xl text-gray-900 mb-3 leading-tight" style={{ fontFamily: "'Pacifico', cursive" }}>
                             {product.name}
@@ -190,7 +145,7 @@ export default function ProductDetail() {
                         <div className="mb-6">
                             <label className="block text-xs font-bold text-[#7a6060] uppercase mb-3">Varian <span className="text-[#b31c24]">*</span></label>
                             <div className="flex flex-wrap gap-2">
-                                {variants.map((v) => (
+                                {variants.map((v: any) => (
                                     <button
                                         key={v.name} onClick={() => setSelectedVariant(v)}
                                         className={`px-4 py-2 rounded-xl border-2 font-bold text-sm ${selectedVariant?.name === v.name ? 'bg-[#b31c24] border-[#b31c24] text-white' : 'bg-white border-[#e8d5c4] text-gray-700'}`}
@@ -203,7 +158,7 @@ export default function ProductDetail() {
                         <div>
                             <label className="block text-xs font-bold text-[#7a6060] uppercase mb-3">Ukuran <span className="text-[#b31c24]">*</span></label>
                             <div className="flex flex-wrap gap-2">
-                                {sizes.map((s) => (
+                                {sizes.map((s: any) => (
                                     <button
                                         key={s.name} onClick={() => setSelectedSize(s)}
                                         className={`px-4 py-2 rounded-xl border-2 font-bold text-sm ${selectedSize?.name === s.name ? 'bg-[#b31c24] border-[#b31c24] text-white' : 'bg-white border-[#e8d5c4] text-gray-700'}`}

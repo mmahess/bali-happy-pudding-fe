@@ -63,8 +63,25 @@ export default function Cart() {
         message += "------------------------------------------\n";
         message += `*TOTAL KESELURUHAN: Rp ${totalPrice.toLocaleString('id-ID')}*`;
 
+        // Simpan ke Riwayat Pembelian (untuk Admin)
+        const newOrder = {
+            orderDate: new Date().toISOString(),
+            deliveryDate: formData.date,
+            customerName: formData.orderer,
+            waNumber: formData.phone,
+            items: cartItems,
+            totalPrice: totalPrice,
+        };
+        const history = JSON.parse(localStorage.getItem('purchaseHistory') || '[]');
+        localStorage.setItem('purchaseHistory', JSON.stringify([...history, newOrder]));
+
+        // Buka WhatsApp
         const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
         window.open(url, '_blank');
+
+        // Kosongkan keranjang setelah checkout (opsional, tapi disarankan)
+        setCartItems([]);
+        localStorage.removeItem('cart');
     };
 
     return (
