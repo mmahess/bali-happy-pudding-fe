@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from '@inertiajs/react';
 
 // Komponen Product Card 
 const ProductCard = ({ name, description, price, image }: any) => {
@@ -20,9 +21,13 @@ const ProductCard = ({ name, description, price, image }: any) => {
                     <p className="text-red-700 font-bold">
                         Rp{price.toLocaleString('id-ID')}
                     </p>
-                    <button className="px-4 py-1.5 rounded-full border border-red-700 text-red-700 text-sm font-semibold hover:bg-red-50 transition-colors">
+                    {/* 2. Ubah button menjadi Link dan arahkan ke rute /pesan */}
+                    <Link 
+                        href="/pesan" 
+                        className="px-4 py-1.5 rounded-full border border-red-700 text-red-700 text-sm font-semibold hover:bg-red-50 transition-colors"
+                    >
                         Buat Pesanan
-                    </button>
+                    </Link>
                 </div>
             </div>
         </div>
@@ -66,7 +71,7 @@ export default function Catalog() {
 
     return (
         // Mengubah font utama seluruh halaman menjadi Montserrat
-        <div className="min-h-screen bg-[#FAF8F5]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
+        <div className="min-h-screen bg-[#f4efe7]" style={{ fontFamily: "'Montserrat', sans-serif" }}>
             
             <nav className="bg-[#b91c1c] text-white p-4 sticky top-0 z-50 shadow-md">
                 <div className="container mx-auto flex justify-between items-center px-4">
