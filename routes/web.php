@@ -14,3 +14,7 @@ Route::get('/katalog', function () {
 Route::get('/pesan', function () {
     return Inertia::render('ProductDetail');
 });
+
+Route::get('/keranjang', function () {
+    return Inertia::render('Cart');
+});
