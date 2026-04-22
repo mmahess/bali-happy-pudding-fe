@@ -13,12 +13,13 @@ export default function ProductCard({ id, name, description, price, image }: any
                         onError={(e) => { 
                             e.currentTarget.style.display = 'none'; 
                             if (e.currentTarget.parentElement) 
-                                e.currentTarget.parentElement.innerHTML = `<div class="absolute inset-0 flex items-center justify-center text-gray-400 text-sm text-center px-4">[ Gambar ${name} ]</div>`; 
+                                e.currentTarget.parentElement.innerHTML = `<div class="absolute inset-0 flex flex-col items-center justify-center text-red-200 bg-red-50"><span class="text-4xl mb-2 opacity-80">🍮</span><span class="text-[10px] font-bold text-[#b31c24] px-4 text-center">Gambar tidak tersedia</span></div>`; 
                         }} 
                     />
                 ) : (
-                    <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm text-center px-4">
-                        [ Gambar {name} ]
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-red-200 bg-red-50">
+                        <span className="text-4xl mb-2 opacity-80">🍮</span>
+                        <span className="text-[10px] font-bold text-[#b31c24] px-4 text-center">Gambar tidak tersedia</span>
                     </div>
                 )}
             </div>

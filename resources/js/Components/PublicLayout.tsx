@@ -1,4 +1,5 @@
 import React from 'react';
+import { Toaster } from 'react-hot-toast';
 import Navbar from './Navbar';
 import Footer from './Footer';
 
@@ -22,6 +23,37 @@ export default function PublicLayout({ children, navbarProps }: PublicLayoutProp
                 {children}
             </div>
             <Footer />
+            <Toaster 
+                position="bottom-center"
+                toastOptions={{
+                    success: {
+                        style: {
+                            border: '2px solid #e8d5c4',
+                            padding: '16px',
+                            color: '#b31c24',
+                            fontWeight: 'bold',
+                            background: '#fdf6ee'
+                        },
+                        iconTheme: {
+                            primary: '#b31c24',
+                            secondary: '#FFFAEE',
+                        },
+                    },
+                    error: {
+                        style: {
+                            border: '2px solid #b31c24',
+                            padding: '16px',
+                            color: '#fff',
+                            fontWeight: 'bold',
+                            background: '#b31c24'
+                        },
+                        iconTheme: {
+                            primary: '#fff',
+                            secondary: '#b31c24',
+                        },
+                    }
+                }}
+            />
         </div>
     );
 }

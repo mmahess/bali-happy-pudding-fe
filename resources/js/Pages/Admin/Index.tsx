@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from '@inertiajs/react';
+import toast from 'react-hot-toast';
 
 export default function AdminIndex() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [password, setPassword] = useState('');
-    const [activeTab, setActiveTab] = useState('products');
+    const [activeTab, setActiveTab] = useState('dashboard');
+    const [timeFilter, setTimeFilter] = useState('all');
 
     // States for data
     const [allProducts, setAllProducts] = useState<any[]>([]);
@@ -74,8 +76,9 @@ export default function AdminIndex() {
         if (password === 'admin123') {
             localStorage.setItem('adminAuth', 'true');
             setIsAuthenticated(true);
+            toast.success('Login berhasil!');
         } else {
-            alert('Password salah!');
+            toast.error('Password salah!');
         }
     };
 
@@ -88,7 +91,8 @@ export default function AdminIndex() {
     const handleAddProduct = (e: React.FormEvent) => {
         e.preventDefault();
         if (!newProduct.name || newProduct.sizes.length === 0) {
-            return alert('Nama Produk dan minimal satu Ukuran wajib diisi!');
+            toast.error('Nama Produk dan minimal satu Ukuran wajib diisi!');
+            return;
         }
 
         const basePrice = newProduct.sizes[0].price;
@@ -108,15 +112,15 @@ export default function AdminIndex() {
         let updatedProducts;
         if (editingProductId) {
             updatedProducts = allProducts.map(p => p.id === editingProductId ? productData : p);
-            alert('Produk berhasil diperbarui!');
+            toast.success('Produk berhasil diperbarui!');
         } else {
             updatedProducts = [...allProducts, productData];
-            alert('Produk baru berhasil ditambahkan!');
+            toast.success('Produk baru berhasil ditambahkan!');
         }
-        
+
         setAllProducts(updatedProducts);
         localStorage.setItem('allProducts', JSON.stringify(updatedProducts));
-        
+
         // Reset & Close form
         setIsFormOpen(false);
         setEditingProductId(null);
@@ -176,8 +180,8 @@ export default function AdminIndex() {
         const priceNum = parseInt(tempSize.price);
         setNewProduct({
             ...newProduct,
-            sizes: [...newProduct.sizes, { 
-                name: tempSize.name, 
+            sizes: [...newProduct.sizes, {
+                name: tempSize.name,
                 price: priceNum,
                 label: `${priceNum / 1000}K`
             }]
@@ -247,6 +251,38 @@ export default function AdminIndex() {
         );
     }
 
+    const filteredHistory = purchaseHistory.filter(order => {
+        if (timeFilter === 'all') return true;
+        const orderDate = new Date(order.orderDate);
+        const now = new Date();
+        if (timeFilter === 'today') {
+            return orderDate.toDateString() === now.toDateString();
+        }
+        if (timeFilter === 'month') {
+            return orderDate.getMonth() === now.getMonth() && orderDate.getFullYear() === now.getFullYear();
+        }
+        if (timeFilter === 'year') {
+            return orderDate.getFullYear() === now.getFullYear();
+        }
+        return true;
+    });
+
+    const productStats: Record<string, number> = {};
+    const variantStats: Record<string, number> = {};
+
+    filteredHistory.forEach(order => {
+        order.items.forEach((item: any) => {
+            const qty = item.quantity || 1;
+            productStats[item.name] = (productStats[item.name] || 0) + qty;
+            if (item.variant) {
+                variantStats[item.variant] = (variantStats[item.variant] || 0) + qty;
+            }
+        });
+    });
+
+    const topProducts = Object.entries(productStats).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const topVariants = Object.entries(variantStats).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
     return (
         <div className="min-h-screen bg-gray-50" style={{ fontFamily: "'Montserrat', sans-serif" }}>
             {/* Navbar Admin */}
@@ -267,6 +303,12 @@ export default function AdminIndex() {
             <div className="container mx-auto px-4 py-8 max-w-6xl flex flex-col md:flex-row gap-8">
                 {/* Sidebar Menu */}
                 <div className="w-full md:w-64 flex flex-col gap-2">
+                    <button
+                        onClick={() => setActiveTab('dashboard')}
+                        className={`text-left px-5 py-3 rounded-xl font-bold transition-all ${activeTab === 'dashboard' ? 'bg-[#b31c24] text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'}`}
+                    >
+                        📊 Dashboard Analitik
+                    </button>
                     <button
                         onClick={() => setActiveTab('products')}
                         className={`text-left px-5 py-3 rounded-xl font-bold transition-all ${activeTab === 'products' ? 'bg-[#b31c24] text-white shadow-md' : 'bg-white text-gray-600 hover:bg-gray-100'}`}
@@ -290,22 +332,89 @@ export default function AdminIndex() {
                 {/* Content Area */}
                 <div className="flex-1">
 
+                    {/* TAB: DASHBOARD */}
+                    {activeTab === 'dashboard' && (
+                        <div className="flex flex-col gap-6">
+                            <div className="flex justify-between items-center mb-2">
+                                <h2 className="text-2xl font-bold text-gray-800">Ringkasan Penjualan</h2>
+                                <select 
+                                    value={timeFilter} 
+                                    onChange={(e) => setTimeFilter(e.target.value)}
+                                    className="border-2 border-[#e8d5c4] rounded-lg px-3 py-2 text-sm font-bold text-gray-700 focus:outline-none focus:border-[#b31c24] bg-white cursor-pointer"
+                                >
+                                    <option value="today">Hari Ini</option>
+                                    <option value="month">Bulan Ini</option>
+                                    <option value="year">Tahun Ini</option>
+                                    <option value="all">Semua Waktu</option>
+                                </select>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#e8d5c4] flex flex-col justify-center items-center">
+                                    <span className="text-[#7a6060] mb-2 font-bold text-sm uppercase tracking-wider">Total Pendapatan</span>
+                                    <span className="text-3xl font-black text-[#25D366]">Rp {filteredHistory.reduce((acc, curr) => acc + curr.totalPrice, 0).toLocaleString('id-ID')}</span>
+                                </div>
+                                <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#e8d5c4] flex flex-col justify-center items-center">
+                                    <span className="text-[#7a6060] mb-2 font-bold text-sm uppercase tracking-wider">Total Pesanan</span>
+                                    <span className="text-3xl font-black text-blue-600">{filteredHistory.length}</span>
+                                </div>
+                                <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#e8d5c4] flex flex-col justify-center items-center">
+                                    <span className="text-[#7a6060] mb-2 font-bold text-sm uppercase tracking-wider">Total Item Terjual</span>
+                                    <span className="text-3xl font-black text-purple-600">{filteredHistory.reduce((acc, curr) => acc + curr.items.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0), 0)}</span>
+                                </div>
+                            </div>
+
+                            {/* Top Stats */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+                                <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#e8d5c4]">
+                                    <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">🏆 Top Produk (Terjual)</h3>
+                                    {topProducts.length === 0 ? (
+                                        <p className="text-gray-500 text-sm italic">Belum ada data penjualan.</p>
+                                    ) : (
+                                        <ul className="space-y-3">
+                                            {topProducts.map(([name, qty], idx) => (
+                                                <li key={idx} className="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-100">
+                                                    <span className="font-bold text-gray-700">{idx + 1}. {name}</span>
+                                                    <span className="bg-[#fdf0f0] text-[#b31c24] font-bold px-3 py-1 rounded-full text-sm">{qty} porsi</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </div>
+                                <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#e8d5c4]">
+                                    <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">🌟 Top Varian (Pilihan Favorit)</h3>
+                                    {topVariants.length === 0 ? (
+                                        <p className="text-gray-500 text-sm italic">Belum ada data penjualan.</p>
+                                    ) : (
+                                        <ul className="space-y-3">
+                                            {topVariants.map(([variant, qty], idx) => (
+                                                <li key={idx} className="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-100">
+                                                    <span className="font-bold text-gray-700">{idx + 1}. {variant}</span>
+                                                    <span className="bg-[#fdf0f0] text-[#b31c24] font-bold px-3 py-1 rounded-full text-sm">{qty} dipesan</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* TAB: PRODUK */}
                     {activeTab === 'products' && (
                         <div className="flex flex-col gap-6">
-                            
+
                             {!isFormOpen ? (
                                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                                     <div className="flex justify-between items-center mb-6">
                                         <h2 className="text-xl font-bold text-gray-800">Daftar Produk (Katalog)</h2>
-                                        <button 
-                                            onClick={() => setIsFormOpen(true)} 
+                                        <button
+                                            onClick={() => setIsFormOpen(true)}
                                             className="bg-[#b31c24] text-white px-5 py-2 rounded-lg font-bold hover:bg-[#8a1219] transition-all"
                                         >
                                             + Tambah Produk Baru
                                         </button>
                                     </div>
-                                    
+
                                     {allProducts.length === 0 ? (
                                         <p className="text-gray-500 text-sm text-center py-8">Katalog kosong. Belum ada produk.</p>
                                     ) : (
@@ -354,14 +463,14 @@ export default function AdminIndex() {
                                         <h2 className="text-xl font-bold text-gray-800">
                                             {editingProductId ? 'Edit Produk' : 'Tambah Produk Baru'}
                                         </h2>
-                                        <button 
-                                            onClick={handleCancelEdit} 
+                                        <button
+                                            onClick={handleCancelEdit}
                                             className="text-gray-500 hover:text-gray-700 font-bold"
                                         >
                                             ✕ Batal
                                         </button>
                                     </div>
-                                    
+
                                     <form onSubmit={handleAddProduct} className="flex flex-col gap-6">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
@@ -391,7 +500,7 @@ export default function AdminIndex() {
                                         <div className="border border-gray-200 rounded-xl p-4 bg-gray-50">
                                             <label className="block text-sm font-bold text-gray-800 mb-3">🎨 Varian Rasa</label>
                                             <div className="flex gap-2 mb-3">
-                                                <input type="text" value={tempVariant} onChange={e => setTempVariant(e.target.value)} placeholder="Contoh: Black Forest" className="flex-1 border rounded-lg p-2 text-sm focus:border-[#b31c24] focus:outline-none" onKeyDown={e => { if(e.key==='Enter') { e.preventDefault(); handleAddVariant(); } }} />
+                                                <input type="text" value={tempVariant} onChange={e => setTempVariant(e.target.value)} placeholder="Contoh: Black Forest" className="flex-1 border rounded-lg p-2 text-sm focus:border-[#b31c24] focus:outline-none" onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddVariant(); } }} />
                                                 <button type="button" onClick={handleAddVariant} className="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-700">Tambah Varian</button>
                                             </div>
                                             <div className="flex flex-wrap gap-2">
@@ -409,8 +518,8 @@ export default function AdminIndex() {
                                         <div className="border border-gray-200 rounded-xl p-4 bg-gray-50">
                                             <label className="block text-sm font-bold text-gray-800 mb-3">📏 Ukuran & Harga (Wajib)</label>
                                             <div className="flex flex-col md:flex-row gap-2 mb-3">
-                                                <input type="text" value={tempSize.name} onChange={e => setTempSize({...tempSize, name: e.target.value})} placeholder="Contoh: Ukuran 21x9cm" className="flex-1 border rounded-lg p-2 text-sm focus:border-[#b31c24] focus:outline-none" onKeyDown={e => { if(e.key==='Enter') { e.preventDefault(); } }} />
-                                                <input type="number" value={tempSize.price} onChange={e => setTempSize({...tempSize, price: e.target.value})} placeholder="Harga (Rp)" className="w-full md:w-32 border rounded-lg p-2 text-sm focus:border-[#b31c24] focus:outline-none" onKeyDown={e => { if(e.key==='Enter') { e.preventDefault(); handleAddSize(); } }} />
+                                                <input type="text" value={tempSize.name} onChange={e => setTempSize({ ...tempSize, name: e.target.value })} placeholder="Contoh: Ukuran 21x9cm" className="flex-1 border rounded-lg p-2 text-sm focus:border-[#b31c24] focus:outline-none" onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); } }} />
+                                                <input type="number" value={tempSize.price} onChange={e => setTempSize({ ...tempSize, price: e.target.value })} placeholder="Harga (Rp)" className="w-full md:w-32 border rounded-lg p-2 text-sm focus:border-[#b31c24] focus:outline-none" onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddSize(); } }} />
                                                 <button type="button" onClick={handleAddSize} className="bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-700">Tambah Ukuran</button>
                                             </div>
                                             <div className="flex flex-col gap-2">
@@ -438,9 +547,22 @@ export default function AdminIndex() {
                     {/* TAB: HISTORY */}
                     {activeTab === 'history' && (
                         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                            <h2 className="text-xl font-bold text-gray-800 mb-4">Riwayat Pembelian</h2>
-                            {purchaseHistory.length === 0 ? (
-                                <p className="text-gray-500 text-sm">Belum ada pesanan yang masuk.</p>
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-xl font-bold text-gray-800">Riwayat Pembelian</h2>
+                                <select 
+                                    value={timeFilter} 
+                                    onChange={(e) => setTimeFilter(e.target.value)}
+                                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm font-bold text-gray-700 focus:outline-none focus:border-[#b31c24] bg-white cursor-pointer"
+                                >
+                                    <option value="today">Hari Ini</option>
+                                    <option value="month">Bulan Ini</option>
+                                    <option value="year">Tahun Ini</option>
+                                    <option value="all">Semua Waktu</option>
+                                </select>
+                            </div>
+                            
+                            {filteredHistory.length === 0 ? (
+                                <p className="text-gray-500 text-sm text-center py-8">Belum ada pesanan pada rentang waktu ini.</p>
                             ) : (
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-left border-collapse min-w-[600px]">
@@ -453,7 +575,7 @@ export default function AdminIndex() {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {purchaseHistory.slice().reverse().map((order, idx) => (
+                                            {filteredHistory.slice().reverse().map((order, idx) => (
                                                 <tr key={idx} className="border-b hover:bg-gray-50 align-top">
                                                     <td className="p-3 text-sm text-gray-600">
                                                         {new Date(order.orderDate).toLocaleString('id-ID')}
@@ -466,7 +588,7 @@ export default function AdminIndex() {
                                                     <td className="p-3 text-sm">
                                                         <ul className="list-disc pl-4 text-gray-700">
                                                             {order.items.map((item: any, i: number) => (
-                                                                <li key={i}>{item.name} ({item.variant} - {item.size}) - <span className="text-red-600">Rp{(item.price || 0).toLocaleString('id-ID')}</span></li>
+                                                                <li key={i}>{item.name} ({item.variant} - {item.size}) <span className="font-bold">x{item.quantity || 1}</span> - <span className="text-red-600">Rp{(item.price * (item.quantity || 1)).toLocaleString('id-ID')}</span></li>
                                                             ))}
                                                         </ul>
                                                     </td>

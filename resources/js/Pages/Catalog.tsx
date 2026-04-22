@@ -4,12 +4,14 @@ import PublicLayout from '../Components/PublicLayout';
 
 export default function Catalog() {
     const [activeCategory, setActiveCategory] = useState('Semua');
-
-    const categories = ['Semua', 'Pudding Tart', 'Whole Pudding', 'Pudding Cup', 'Pudding Tumpeng'];
+    const [searchQuery, setSearchQuery] = useState('');
 
     const [allProducts, setAllProducts] = useState<any[]>([]);
     const [banners, setBanners] = useState<string[]>([]);
     const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+
+    // Kategori Dinamis
+    const categories = ['Semua', ...Array.from(new Set(allProducts.map(p => p.category)))];
 
     // Membaca data dari localStorage saat halaman dimuat
     useEffect(() => {
@@ -92,19 +94,33 @@ export default function Catalog() {
             </header>
 
             <main className="container mx-auto px-4 py-8 max-w-5xl">
-                <div className="flex flex-wrap gap-3 mb-8">
-                    {categories.map((cat) => (
-                        <button
-                            key={cat}
-                            onClick={() => setActiveCategory(cat)}
-                            className={`px-5 py-1.5 rounded-full text-sm font-medium border transition-colors ${activeCategory === cat
-                                ? 'bg-[#b31c24] text-white border-[#b31c24]'
-                                : 'bg-white text-gray-700 border-yellow-500 hover:border-red-700'
-                                }`}
-                        >
-                            {cat}
-                        </button>
-                    ))}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                    <div className="flex flex-wrap gap-2 md:gap-3">
+                        {categories.map((cat: any) => (
+                            <button
+                                key={cat}
+                                onClick={() => setActiveCategory(cat)}
+                                className={`px-4 md:px-5 py-1.5 rounded-full text-xs md:text-sm font-medium border transition-colors ${activeCategory === cat
+                                    ? 'bg-[#b31c24] text-white border-[#b31c24]'
+                                    : 'bg-white text-gray-700 border-yellow-500 hover:border-red-700'
+                                    }`}
+                            >
+                                {cat}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Search Bar */}
+                    <div className="relative w-full md:w-64 shrink-0">
+                        <input 
+                            type="text" 
+                            placeholder="Cari nama atau rasa..." 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 border-2 border-[#e8d5c4] rounded-full focus:outline-none focus:border-[#b31c24] transition-colors text-sm"
+                        />
+                        <span className="absolute left-3 top-2.5 text-gray-400">🔍</span>
+                    </div>
                 </div>
 
                 <div className="mb-6">
@@ -114,7 +130,14 @@ export default function Catalog() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                    {allProducts.filter(p => activeCategory === 'Semua' || p.category === activeCategory).map((product) => (
+                    {allProducts.filter(p => {
+                        const matchCat = activeCategory === 'Semua' || p.category === activeCategory;
+                        const searchLower = searchQuery.toLowerCase();
+                        const matchSearch = p.name.toLowerCase().includes(searchLower) || 
+                                            (p.description && p.description.toLowerCase().includes(searchLower)) ||
+                                            (p.variants && p.variants.some((v: any) => v.name.toLowerCase().includes(searchLower)));
+                        return matchCat && matchSearch;
+                    }).map((product) => (
                         <ProductCard
                             key={product.id}
                             id={product.id}
@@ -124,6 +147,21 @@ export default function Catalog() {
                             image={product.image}
                         />
                     ))}
+                    
+                    {/* Empty State untuk pencarian */}
+                    {allProducts.filter(p => {
+                        const matchCat = activeCategory === 'Semua' || p.category === activeCategory;
+                        const searchLower = searchQuery.toLowerCase();
+                        const matchSearch = p.name.toLowerCase().includes(searchLower) || 
+                                            (p.description && p.description.toLowerCase().includes(searchLower)) ||
+                                            (p.variants && p.variants.some((v: any) => v.name.toLowerCase().includes(searchLower)));
+                        return matchCat && matchSearch;
+                    }).length === 0 && (
+                        <div className="col-span-full py-12 text-center text-gray-500">
+                            <div className="text-4xl mb-3">🥺</div>
+                            <p>Maaf, puding yang Anda cari tidak ditemukan.</p>
+                        </div>
+                    )}
                 </div>
             </main>
         </PublicLayout>

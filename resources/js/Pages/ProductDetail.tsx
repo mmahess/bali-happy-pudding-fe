@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from '@inertiajs/react';
+import toast from 'react-hot-toast';
 import PublicLayout from '../Components/PublicLayout';
 
 export default function ProductDetail() {
@@ -58,22 +59,36 @@ export default function ProductDetail() {
 
     const handleSubmit = () => {
         if (!selectedVariant || !selectedSize) {
-            alert('Silakan pilih varian dan ukuran puding terlebih dahulu.');
+            toast.error('Silakan pilih varian dan ukuran puding terlebih dahulu.');
             return;
         }
 
-        // Simpan semua data ke objek keranjang
+        const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
+        
+        const existingItemIndex = existingCart.findIndex((item: any) => 
+            item.name === product.name && 
+            item.variant === selectedVariant.name && 
+            item.size === selectedSize.name
+        );
+
         const newItem = {
-            id: Date.now(),
+            id: existingItemIndex >= 0 ? existingCart[existingItemIndex].id : Date.now(),
+            productId: product.id,
             name: product.name,
             variant: selectedVariant.name,
             size: selectedSize.name,
-            price: totalPrice
+            price: totalPrice,
+            quantity: 1
         };
 
-        // Simpan ke localStorage
-        const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
-        localStorage.setItem('cart', JSON.stringify([...existingCart, newItem]));
+        let finalCart = [...existingCart];
+        if (existingItemIndex >= 0) {
+            finalCart[existingItemIndex].quantity = (finalCart[existingItemIndex].quantity || 1) + 1;
+        } else {
+            finalCart.push(newItem);
+        }
+
+        localStorage.setItem('cart', JSON.stringify(finalCart));
 
         setAddedItemDetails(newItem);
         setShowSuccessModal(true);
@@ -91,10 +106,24 @@ export default function ProductDetail() {
 
                 {/* KIRI: PRODUCT INFO (Sticky) - Tetap sama */}
                 <div className="w-full md:w-100 md:sticky md:top-24">
-                    <div className="w-full h-64 bg-gray-300 relative">
-                        <div className="absolute inset-0 flex items-center justify-center text-gray-500 font-medium">
-                            [ Gambar Puding ]
-                        </div>
+                    <div className="w-full aspect-square md:aspect-auto md:h-80 bg-gray-200 relative rounded-3xl overflow-hidden shadow-sm">
+                        {product.image && product.image !== '' ? (
+                            <img 
+                                src={product.image} 
+                                alt={product.name} 
+                                className="w-full h-full object-cover" 
+                                onError={(e) => { 
+                                    e.currentTarget.style.display = 'none'; 
+                                    if (e.currentTarget.parentElement) 
+                                        e.currentTarget.parentElement.innerHTML = `<div class="absolute inset-0 flex flex-col items-center justify-center text-red-200 bg-red-50"><span class="text-6xl mb-4 opacity-80">🍮</span><span class="text-sm font-bold text-[#b31c24] px-4 text-center">Gambar tidak tersedia</span></div>`; 
+                                }} 
+                            />
+                        ) : (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center text-red-200 bg-red-50">
+                                <span className="text-6xl mb-4 opacity-80">🍮</span>
+                                <span className="text-sm font-bold text-[#b31c24] px-4 text-center">Gambar tidak tersedia</span>
+                            </div>
+                        )}
                     </div>
 
                     <div className="pt-6">
