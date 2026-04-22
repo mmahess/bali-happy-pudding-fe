@@ -8,7 +8,9 @@ export default function ProductDetail() {
     const [selectedSize, setSelectedSize] = useState<any>(null);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [addedItemDetails, setAddedItemDetails] = useState<any>(null);
-
+    const [ucapanTusuk, setUcapanTusuk] = useState('');
+    const [greetingCard, setGreetingCard] = useState('');
+    const [specialRequest, setSpecialRequest] = useState('');
 
 
     // Dapatkan data dari localStorage atau gunakan default
@@ -64,11 +66,14 @@ export default function ProductDetail() {
         }
 
         const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
-        
-        const existingItemIndex = existingCart.findIndex((item: any) => 
-            item.name === product.name && 
-            item.variant === selectedVariant.name && 
-            item.size === selectedSize.name
+
+        const existingItemIndex = existingCart.findIndex((item: any) =>
+            item.name === product.name &&
+            item.variant === selectedVariant.name &&
+            item.size === selectedSize.name &&
+            item.ucapanTusuk === (ucapanTusuk.trim() || undefined) &&
+            item.greetingCard === (greetingCard.trim() || undefined) &&
+            item.specialRequest === (specialRequest.trim() || undefined)
         );
 
         const newItem = {
@@ -78,7 +83,10 @@ export default function ProductDetail() {
             variant: selectedVariant.name,
             size: selectedSize.name,
             price: totalPrice,
-            quantity: 1
+            quantity: 1,
+            ucapanTusuk: ucapanTusuk.trim() || undefined,
+            greetingCard: greetingCard.trim() || undefined,
+            specialRequest: specialRequest.trim() || undefined
         };
 
         let finalCart = [...existingCart];
@@ -95,11 +103,11 @@ export default function ProductDetail() {
     };
 
     return (
-        <PublicLayout navbarProps={{ 
-            title: 'Buat Pesanan', 
-            showBackButton: true, 
+        <PublicLayout navbarProps={{
+            title: 'Buat Pesanan',
+            showBackButton: true,
             backUrl: '/katalog',
-            showCart: true 
+            showCart: true
         }}>
 
             <div className="container mx-auto max-w-5xl px-4 py-8 md:py-12 flex flex-col md:flex-row gap-8 items-start">
@@ -108,15 +116,15 @@ export default function ProductDetail() {
                 <div className="w-full md:w-100 md:sticky md:top-24">
                     <div className="w-full aspect-square md:aspect-auto md:h-80 bg-gray-200 relative rounded-3xl overflow-hidden shadow-sm">
                         {product.image && product.image !== '' ? (
-                            <img 
-                                src={product.image} 
-                                alt={product.name} 
-                                className="w-full h-full object-cover" 
-                                onError={(e) => { 
-                                    e.currentTarget.style.display = 'none'; 
-                                    if (e.currentTarget.parentElement) 
-                                        e.currentTarget.parentElement.innerHTML = `<div class="absolute inset-0 flex flex-col items-center justify-center text-red-200 bg-red-50"><span class="text-6xl mb-4 opacity-80">🍮</span><span class="text-sm font-bold text-[#b31c24] px-4 text-center">Gambar tidak tersedia</span></div>`; 
-                                }} 
+                            <img
+                                src={product.image}
+                                alt={product.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                    if (e.currentTarget.parentElement)
+                                        e.currentTarget.parentElement.innerHTML = `<div class="absolute inset-0 flex flex-col items-center justify-center text-red-200 bg-red-50"><span class="text-6xl mb-4 opacity-80">🍮</span><span class="text-sm font-bold text-[#b31c24] px-4 text-center">Gambar tidak tersedia</span></div>`;
+                                }}
                             />
                         ) : (
                             <div className="absolute inset-0 flex flex-col items-center justify-center text-red-200 bg-red-50">
@@ -136,6 +144,16 @@ export default function ProductDetail() {
                         <p className="text-[#7a6060] text-sm leading-relaxed mb-4 text-justify">
                             {product.description}
                         </p>
+
+                        <div className="bg-[#fdf6ee] border border-[#e8d5c4] rounded-xl p-4 mb-4">
+                            <span className="block text-xs font-bold text-[#b31c24] uppercase tracking-wider mb-2">🎁 Harga Sudah Termasuk:</span>
+                            <ul className="text-sm text-[#7a6060] list-disc list-inside space-y-1">
+                                <li>Vla botol (200ml)</li>
+                                <li>Lilin (khusus untuk ulang tahun)</li>
+                                <li>Ucapan tusuk (sesuai request)</li>
+                                <li>Greeting card (sesuai request)</li>
+                            </ul>
+                        </div>
 
                         {(selectedVariant || selectedSize) && (
                             <div className="bg-[#fdf0f0] border-2 border-[#f0c8c8] rounded-xl p-4 mt-4">
@@ -182,6 +200,39 @@ export default function ProductDetail() {
                                     </button>
                                 ))}
                             </div>
+                        </div>
+                    </div>
+
+                    {/* SECTION 2: Request Tambahan (Opsional) */}
+                    <div className="bg-white border-2 border-[#e8d5c4] rounded-2xl p-6 shadow-sm">
+                        <h2 className="text-lg font-bold text-gray-900 mb-5 flex items-center gap-2">🎁 Tambahan (Opsional)</h2>
+                        <div className="mb-4">
+                            <label className="block text-xs font-bold text-[#7a6060] mb-2">Ucapan Tusuk</label>
+                            <input
+                                type="text"
+                                value={ucapanTusuk}
+                                onChange={(e) => setUcapanTusuk(e.target.value)}
+                                placeholder="Contoh: Happy Birthday Budi"
+                                className="w-full bg-[#fdf6ee] border-2 border-[#e8d5c4] rounded-xl px-4 py-3 font-semibold placeholder-gray-400 text-sm"
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-xs font-bold text-[#7a6060] mb-2">Greeting Card</label>
+                            <textarea
+                                value={greetingCard}
+                                onChange={(e) => setGreetingCard(e.target.value)}
+                                placeholder="Contoh: Selamat ulang tahun, semoga panjang umur dan sehat selalu!"
+                                className="w-full bg-[#fdf6ee] border-2 border-[#e8d5c4] rounded-xl px-4 py-3 font-semibold placeholder-gray-400 text-sm min-h-[80px]"
+                            ></textarea>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-[#7a6060] mb-2">Special Request</label>
+                            <textarea
+                                value={specialRequest}
+                                onChange={(e) => setSpecialRequest(e.target.value)}
+                                placeholder="Contoh: Tambah topper custom/mainan, edible print, dsb (Harga akan disesuaikan via WA)"
+                                className="w-full bg-[#fdf6ee] border-2 border-[#e8d5c4] rounded-xl px-4 py-3 font-semibold placeholder-gray-400 text-sm min-h-[80px]"
+                            ></textarea>
                         </div>
                     </div>
 

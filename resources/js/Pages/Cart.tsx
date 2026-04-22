@@ -70,6 +70,9 @@ export default function Cart() {
             message += `*${index + 1}. ${item.name}*\n`;
             message += `• Varian: ${item.variant}\n`;
             message += `• Ukuran: ${item.size}\n`;
+            if (item.ucapanTusuk) message += `• Ucapan Tusuk: ${item.ucapanTusuk}\n`;
+            if (item.greetingCard) message += `• Greeting Card: ${item.greetingCard}\n`;
+            if (item.specialRequest) message += `• Special Request: ${item.specialRequest}\n`;
             message += `• Jumlah: ${item.quantity || 1}x\n`;
             message += `• Harga: Rp ${(item.price * (item.quantity || 1)).toLocaleString('id-ID')}\n\n`;
         });
@@ -79,7 +82,6 @@ export default function Cart() {
         message += `*Pemesan:* ${formData.orderer}\n`;
         message += `*Penerima:* ${finalReceiver} ${!isSameAsOrderer ? `(${finalPhone})` : ''}\n`;
         message += `*Alamat:* ${formData.address}\n`;
-        if (formData.note) message += `*Catatan Khusus:* ${formData.note}\n`;
         message += "------------------------------------------\n";
         message += `*TOTAL KESELURUHAN: Rp ${totalPrice.toLocaleString('id-ID')}*`;
 
@@ -105,11 +107,11 @@ export default function Cart() {
     };
 
     return (
-        <PublicLayout navbarProps={{ 
-            title: 'Keranjang', 
-            showBackButton: true, 
+        <PublicLayout navbarProps={{
+            title: 'Keranjang',
+            showBackButton: true,
             backUrl: '/katalog',
-            showCart: false 
+            showCart: false
         }}>
 
             <main className="container mx-auto px-4 py-8 max-w-6xl">
@@ -118,7 +120,7 @@ export default function Cart() {
                         {/* KOLOM KIRI: FORMULIR */}
                         <div className="w-full lg:w-3/5 space-y-6 order-2 lg:order-1">
                             {/* SECTION 2: Jadwal Pengiriman */}
-                                {/* CART ITEMS WILL BE MOVED TO RIGHT COLUMN */}
+                            {/* CART ITEMS WILL BE MOVED TO RIGHT COLUMN */}
                             <div className="bg-white border-2 border-[#e8d5c4] rounded-2xl p-6 shadow-sm">
                                 <h2 className="text-lg font-bold text-gray-900 mb-5 flex items-center gap-2">📅 Jadwal Pengiriman (Min H-2)</h2>
                                 <input type="date" name="date" value={formData.date} min={minDateString} onChange={handleInputChange} className="w-full bg-[#fdf6ee] border-2 border-[#e8d5c4] rounded-xl px-4 py-3 font-semibold text-gray-800" />
@@ -131,9 +133,9 @@ export default function Cart() {
                                 </div>
                                 <div className="mb-4">
                                     <label className="block text-xs font-bold text-[#7a6060] mb-2">Nama Pemesan *</label>
-                                    <input type="text" name="orderer" value={formData.orderer} onChange={handleInputChange} className="w-full bg-[#fdf6ee] border-2 border-[#e8d5c4] rounded-xl px-4 py-3 font-semibold" />
+                                    <input type="text" name="orderer" value={formData.orderer} onChange={handleInputChange} className="w-full bg-[#fdf6ee] border-2 border-[#e8d5c4] rounded-xl px-4 py-3 font-semibold placeholder-gray-400" />
                                 </div>
-                                
+
                                 <label className="flex items-center gap-2 cursor-pointer mb-5 bg-[#fdf6ee] p-3 rounded-xl border border-[#e8d5c4]">
                                     <input type="checkbox" checked={isSameAsOrderer} onChange={(e) => setIsSameAsOrderer(e.target.checked)} className="w-4 h-4 text-[#b31c24] rounded focus:ring-[#b31c24]" />
                                     <span className="text-sm font-bold text-gray-700">Penerima sama dengan Pemesan</span>
@@ -143,24 +145,18 @@ export default function Cart() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                         <div>
                                             <label className="block text-xs font-bold text-[#7a6060] mb-2">Nama Penerima *</label>
-                                            <input type="text" name="receiver" value={formData.receiver} onChange={handleInputChange} className="w-full bg-[#fdf6ee] border-2 border-[#e8d5c4] rounded-xl px-4 py-3 font-semibold" />
+                                            <input type="text" name="receiver" value={formData.receiver} onChange={handleInputChange} className="w-full bg-[#fdf6ee] border-2 border-[#e8d5c4] rounded-xl px-4 py-3 font-semibold placeholder-gray-400" />
                                         </div>
                                         <div>
                                             <label className="block text-xs font-bold text-[#7a6060] mb-2">No WA Penerima *</label>
-                                            <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} className="w-full bg-[#fdf6ee] border-2 border-[#e8d5c4] rounded-xl px-4 py-3 font-semibold" />
+                                            <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} className="w-full bg-[#fdf6ee] border-2 border-[#e8d5c4] rounded-xl px-4 py-3 font-semibold placeholder-gray-400" />
                                         </div>
                                     </div>
                                 )}
                                 <div>
                                     <label className="block text-xs font-bold text-[#7a6060] mb-2">Alamat Penerima *</label>
-                                    <input type="text" name="address" value={formData.address} onChange={handleInputChange} className="w-full bg-[#fdf6ee] border-2 border-[#e8d5c4] rounded-xl px-4 py-3 font-semibold" />
+                                    <input type="text" name="address" value={formData.address} onChange={handleInputChange} className="w-full bg-[#fdf6ee] border-2 border-[#e8d5c4] rounded-xl px-4 py-3 font-semibold placeholder-gray-400" />
                                 </div>
-                            </div>
-
-                            {/* SECTION 4: Catatan Khusus */}
-                            <div className="bg-white border-2 border-[#e8d5c4] rounded-2xl p-6 shadow-sm mb-4">
-                                <h2 className="text-lg font-bold text-gray-900 mb-5 flex items-center gap-2">✨ Special Request</h2>
-                                <textarea name="note" value={formData.note} onChange={handleInputChange} className="w-full bg-[#fdf6ee] border-2 border-[#e8d5c4] rounded-xl px-4 py-3 font-semibold min-h-25"></textarea>
                             </div>
                         </div>
 
@@ -168,7 +164,7 @@ export default function Cart() {
                         <div className="w-full lg:w-2/5 order-1 lg:order-2">
                             <div className="bg-white border-2 border-[#e8d5c4] rounded-2xl p-6 shadow-md lg:sticky lg:top-24 h-max">
                                 <h2 className="text-lg font-bold text-gray-900 mb-5 flex items-center gap-2 border-b border-[#e8d5c4] pb-4">🛒 Rincian Belanja</h2>
-                                
+
                                 <div className="space-y-4 mb-6 max-h-[40vh] overflow-y-auto pr-2">
                                     {cartItems.map((item) => (
                                         <div key={item.id} className="bg-gray-50 rounded-xl p-4 border border-gray-200 relative">
@@ -179,8 +175,11 @@ export default function Cart() {
                                                 </button>
                                             </div>
 
-                                            <div className="text-xs text-[#7a6060] mb-3">
-                                                <p>{item.variant} ({item.size})</p>
+                                            <div className="text-xs text-[#7a6060] mb-3 space-y-1">
+                                                <p className="font-medium text-gray-700">{item.variant} ({item.size})</p>
+                                                {item.ucapanTusuk && <p className="italic text-gray-500">Tusuk: "{item.ucapanTusuk}"</p>}
+                                                {item.greetingCard && <p className="italic text-gray-500">Card: "{item.greetingCard}"</p>}
+                                                {item.specialRequest && <p className="italic text-orange-600 font-medium">Spesial: "{item.specialRequest}"</p>}
                                             </div>
 
                                             <div className="flex justify-between items-center">
